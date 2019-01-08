@@ -1,2 +1,3 @@
-# blog
-Content, code and related material to my blog
+# Blog
+
+This repository contains the content, related materials for my blog posts.
