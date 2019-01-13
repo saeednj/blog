@@ -299,7 +299,7 @@ Please feel free to reach out if you have any comments on any part.
 Saeed
 
 
-[1]: https://github.com/saeednj/blog/codes/obf
+[1]: https://github.com/saeednj/blog/tree/master/codes/obf
 [2]: https://en.wikipedia.org/wiki/Euclidean_algorithm
 [3]: https://en.wikipedia.org/wiki/Euler%27s_totient_function
 [4]: https://en.wikipedia.org/wiki/Two%27s_complement
