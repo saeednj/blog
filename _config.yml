@@ -4,3 +4,4 @@ theme: jekyll-theme-hacker
 show_downloads: false
 baseurl: "/blog"
 google_analytics: UA-105305819-5
+disqus: saeednblog
