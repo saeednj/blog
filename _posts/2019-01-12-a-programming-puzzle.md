@@ -7,11 +7,11 @@ excerpt:
 ---
 
 I love programming puzzles and challenges. Although I haven't spent much time on it in recent years.
-When I was doing my Master's in Shahid Behesti University, the Science branch of the student association in our department
+When I was doing my Master's in Shahid Beheshti University, the Science branch of the student association in our department
 (for those who know Farsi, I am trying to translate this: انجمن علمی دانشکده),
 asked me to write a programming challenge for a take-home contest. I don't remember the occasion clearly. But it was the night of
-my 25th birthday that I wrote that challenge. Now, after ten years,
-I wanted to write an editorial on it on my 35th birthday.
+my 25th birthday that I wrote that challenge. Now, after ten years, on my 35th birthday,
+I wanted to write an editorial on it.
 You can find all of the codes in this post
 [here][1].
 
@@ -50,7 +50,7 @@ int main()
 
 I have seen functions `A` and `G` somewhere else and haven't written them myself. At the moment I don't remember the source. I will add a reference later when I find it. Having a quick look at the code, you can see that all of the functions are one-liners and except function `G` they all have recursive calls. There are some small weird syntaxes in the code too, like: variable `y` defined in the main function is a `float`, but in the next line we have `x % y` which
 doesn't make sense. For example `5 % 2.5` doesn't have a meaning.
-Or you can see that `s`, `a`, `e` and `d` are defined as arrays, but they are used as indecies of another array in `(*s)[a][e][e][d]` without having an index themselves. Or if you look at the output, there are some numbers printed, but there is no `printf` function applied on a number directly in the code!
+Or you can see that `s`, `a`, `e` and `d` are defined as arrays, but they are used as indices of another array in `(*s)[a][e][e][d]` without having an index themselves. Or if you look at the output, there are some numbers printed, but there is no `printf` function applied on a number directly in the code!
 
 In the [repository][1], the main challenge code is called `obf.c`, you can compile it
 like: `gcc obf.c`. On my machine with `Intel Core i7-3770 / 16GB RAM / 8MB cache / gcc 4.9.2`, it takes _5 minutes and 2.313 seconds_ to generate the output. 
@@ -65,7 +65,8 @@ I was very excited to see how people approached the problem and what are the sol
 
 ## My solution
 
-I will try to explain how each function works but I might not go into details. Contact me and let me know if any of the descriptions is not clear.
+I will try to explain how each function works but I might not go into details. Contact me and let me know if you want to discuss about any of the
+descriptions.
 
 Before trying to understand the code, one easy thing to do is compiling the code with a compiler optimizer to see how much of the jargon will be pruned away. On my machine `gcc -O3 obf.c` will generate the output in _2 minutes 23.497 seconds_, which is nearly a 2X speed-up already.
 
@@ -83,18 +84,18 @@ if ( (a & b) == 0 )
 else
     return A((a&b) << 1, a^b);
 ```
-You can see that the code is computing `and` and `xor` of input bits. If you are familiar with logical circuits, you see that we are mimicing a half-adder, with `xor` as the sum output and `and` as the carry output. The code checks if there is any carry signals or not `if ( (a&b) == 0 )`, and if there is no carry values, the sum of two inputs is equal to their `xor`. Otherwise we need to add the carry values to the next digit position. That's what `(a&b) << 1` is doing (putting carry values in their next digit position), and then calling the `A` function again to add up the carry and sum values. Basically `A` is doing addition (`a + b`).
+You can see that the code is computing `and` and `xor` of input bits. If you are familiar with logical circuits, you see that we are mimicking a half-adder, with `xor` as the sum output and `and` as the carry output. The code checks if there is any carry signal: `if ( (a&b) == 0 )`, and if there are no carry values, the sum of two inputs is equal to their `xor`. Otherwise we need to add the carry values to the next digit position. That's what `(a&b) << 1` is doing (putting carry values in their next digit position), and then calling the `A` function again to add up the carry and sum values. Basically `A` is doing addition (`a + b`). If you want to read more about this type of addition, I refer you to [carry-save addition][6] (where one of the three operands is always zero).
 
 ### Function `P`(rint)
 
-The first thing about this function is, it doesn't use the second argument. So you can remove the second argument and update the calls to this function as well. This function calls `putchar` which prints one character and returns the ascii value of the printed character. The number 48 is the ascii value of character `'0'`, so `putchar(a%10+48)-48`, prints the least significant digit of `a` and evaluate to the value of that digit. Now if we write the code cleaner, we will get:
+The first thing about this function is, it doesn't use the second argument. So you can remove the second argument and update the calls to this function as well. This function calls `putchar` which prints one character and returns the ascii value of the printed character. The number 48 is the ascii value of character `'0'`, so `putchar(a%10+48)-48`, prints the least significant digit of `a` and evaluates to the value of that digit. Now if we write the code cleaner, we will get:
 ```c
 if ( a == 0 )
     return 0;
 else {
-    int s = P(a/10); // drop the right most digit and print
+    int s = P(a/10); // drop the rightmost digit and print
     int d = a % 10;
-    putchar(d + '0'); // print the right most digit
+    putchar(d + '0'); // print the rightmost digit
     return s + d;
 }
 ```
@@ -134,7 +135,7 @@ and knowing that `G` is calculating if `a` and `b` are relatively prime, `F` is 
 
 ### Function `S`(quare)
 
-Let's look at the `A(a,1+~b)` first. `~b` inverts all of the bits in `b`, which in Computer Arithmetic is also called 1's complement of a number. Adding one to 1's complement of a number gives us the [2's complement][4] of it. Negative numbers are represented using 2's complement notation. So `1+~b` is equivalent to `-b`, and we knew that `A(x,y)=x+y`, therefore `A(a,1+~b) = a+(-b) = a-b`.
+Let's look at the `A(a,1+~b)` first. `~b` inverts all of the bits in `b`, also known as 1's complement of a number. Adding one to 1's complement of a number gives us the [2's complement][4] of it. Negative numbers are represented using 2's complement notation. So `1+~b` is equivalent to `-b`, and we knew that `A(x,y)=x+y`, therefore `A(a,1+~b) = a+(-b) = a-b`.
 
 Again we can rewrite the tail recursion as a loop. Note that function `S` is only invoked with `b` set to 1, so we can fix the starting value of `b`.
 ```c
@@ -171,7 +172,7 @@ So, after all, `S` checks if `a` is a perfect square or not.
 
 Now that we understand each function, we can look at what the main program does. There is a loop over the interval [1, 200000], and for each number first the number is printed using `P` and the sum of digits is recorded (`y = P(x,*d);`, recall that second argument is not used). Each number can be either _Good_, _Bad_ or _Ugly_. If the number is not divisible by its sum of digits, it is _Ugly_ (e.g. 11 is Ugly, because it is not divisible by 1+1=2). If the number is beautiful (not Ugly :P), we check whether phi(x) is a perfect square or not, if it is a perfect square, it is Good, otherwise Bad. For example 12 is a Good number: divisible by 1+2, phi(12)=4=2^2.
 
-Finally there is a line that was intended to serve as an "easter egg" if you will. If you see the output generated by this line, it says: "Who's 25?" and the answer is in the code itself that says: `(*s)[a][e][e][d]`. This part was only written as a signature thing, otherwise in a solution one might simply write: `printf(""Who's 25?\n")`. It showcases one the weird things that is valid to a C compiler. When a C compiler wants to generate an address to an element of an array, it take the pointer to head and adds the index to it. So `x[3]` is replaced with `*(x+3)`, and you know that addition is commutative, so it is equal to `*(3+x)` which in array notation is the same as `3[x]` (`x[3]` === `3[x]`). Using this idea, we can swap the index and array name in `(*s)[a][e][e][d]` and get: `d[(*s)[a][e][e]]`, and repeating this, we get: `d[e[e[a[*s]]]]`. `*s` points to the first element in `s`, and it is declared in global scope, so by default it is initialized with zero. `d[e[e[a[*s]]]] = d[e[e[a[0]]]] = d[e[e[0]]] = d[e[0]] = d[0]`, and we know the value of that, because of the line `*d = 25;`
+Finally there is a line that was intended to serve as an "easter egg" if you will. If you see the output generated by this line, it says: "Who's 25?" and the answer is in the code itself that says: `(*s)[a][e][e][d]`. This part was only written as a signature thing, otherwise in a solution one might simply write: `printf("Who's 25?\n")`. It showcases one of the weird things that is valid to a C compiler. When a C compiler wants to generate an address to an element of an array, it take the pointer to the head and adds the index to it. So `x[3]` is replaced with `*(x+3)`, and you know that addition is commutative, so it is equal to `*(3+x)` which in array notation is the same as `3[x]` (`x[3]` === `3[x]`). Using this idea, we can swap the index and array name in `(*s)[a][e][e][d]` and get: `d[(*s)[a][e][e]]`, and repeating this, we get: `d[e[e[a[*s]]]]`. `*s` points to the first element in `s`, and it is declared in global scope, so by default it is initialized with zero. `d[e[e[a[*s]]]] = d[e[e[a[0]]]] = d[e[e[0]]] = d[e[0]] = d[0]`, and we know the value of that, because of the line `*d = 25;`
 
 ### Optimized version
 
@@ -179,7 +180,7 @@ The algorithms for computing each of the functions is simply very inefficient (o
 
 #### Square function
 
-The function `S` detects a number being of the form `k^2` by doing `k` subtractions. So the time complexity of this function is `O(sqrt(n))`. We can do this more efficiently. `y=x^2` is a strictly increasing function (resembles a sorted array if you build `y=a[i]=i*i`), so we can do a binary search. We have an input number `n` and want to find a `x` that `x*x == n`. The interval that this solution (if exists) is definitely in is `[1, n]`. The following code shows how it can be implemented. The resulting time complexity is `O(log(n))`.
+The function `S` detects a number being of the form `k^2` by doing `k` subtractions. So the time complexity of this function is `O(sqrt(n))`. We can do this more efficiently. `y=x^2` is a strictly increasing function (resembles a sorted array if you build `y=a[i]=i*i`), so we can do a binary search. We have an input number `n` and want to find a `x` that `x*x == n`. The interval that this solution (if exists) is definitely in, is `[1, n]`. The following code shows how it can be implemented. The resulting time complexity is `O(log(n))`.
 ```c
 int isSquare(int n)
 {
@@ -197,10 +198,10 @@ int isSquare(int n)
 
 #### Phi function
 
-The main improvement we can make is the computation of phi of each number. The trivial implementation given in the code, performs `O(n)` calls to GCD for each number, therefore, we have `O(n^2)` calls in total, which is most expensive part of the code. We can compute the phi of a number `n` based on the phi of smaller numbers, and because we are computing the phi for those numbers in the loop, we can use memoization to dramatically improve the computation of later phi values. Writing math equation is not very easy in Markdown, so I refer you to the Wikipedia page for the [Euler's phi function][3]. The relation I mainly used is that `Phi(p^k) = p^k * (p-1)` where `p` is a prime number. So scanning prime factors of the input number `n`, if (`p` divides `n / p`) (`n` has prime factor `p` of power more than one),
+The main improvement we can make is the computation of phi of each number. The trivial implementation given in the code, performs `O(n)` calls to GCD for each number, therefore, we have `O(n^2)` calls in total, which is the most expensive part of the code. We can compute the phi of a number `n` based on the phi of smaller numbers, and because we are computing the phi for those numbers in the loop, we can use memoization to dramatically improve the computation of later phi values. Writing math equation is not very easy in Markdown, so I refer you to the Wikipedia page for the [Euler's phi function][3]. The relation I mainly used is `Phi(p^k) = p^k * (p-1)` where `p` is a prime number. So scanning prime factors of the input number `n`, if (`p` divides `n / p`) (`n` has prime factor `p` of power more than one),
 `Phi(n) = Phi(n / p) *  p` and `Phi(n) = Phi(n / p) * (p-1)` otherwise.
 
-Now we can store all the computed values of Phi (memoization) to avoid computing values of Phi for smaller numbers multiple times. This way, computing some of the Phi values takes only one division and one multiplcation. Considering that I have computed the prime numbers in the array `p`, and the array `PHI` is used for recording previously computed values, the code for computing Phi is:
+Now we can store all the computed values of Phi (memoization) to avoid computing them multiple times. This way, computing some of the Phi values takes only one division and one multiplication. Considering that I have computed the prime numbers in the array `p`, and the array `PHI` is used for recording previously computed values, the code for computing Phi is:
 ```c
 int phi(int n)
 {
@@ -218,7 +219,7 @@ int phi(int n)
 
 ```
 
-Computing the prime numbers up to some value can be done using [Sieve of Eratosthenes][5]. This is my implementation of this sieve:
+Computing the prime numbers up to some value can be done using [Sieve of Eratosthenes][5]. This is my implementation of this sieve, with modified loops to cross out even numbers other than 2:
 
 ```c
 void sieve()
@@ -234,7 +235,7 @@ void sieve()
 }
 ```
 
-where `ip` is an array that `ip[x]` represents `isPrime(x)`, and array `p` will contain primes numbers between 1 and N, and `pn` is the number of prime numbers in `p` after the function is done.
+where `ip[x]` represents `isPrime(x)`, and array `p` will contain primes numbers between 1 and N, and `pn` is the number of prime numbers in `p` after the function is done.
 
 And finally the main function becomes:
 ```c
@@ -258,7 +259,7 @@ The full version can be found in the [repo][1] in the file `ans.c`, and on the m
 
 ## Other solutions
 
-After I released the challenge, I realized that the property of being Good, Bad or Ugly is computed for each number independent of other numbers. Which calls for an embarassingly parallel computation. I did
+After I released the challenge, I realized that for each number, the property of being Good, Bad or Ugly is computed independent of other numbers. Which calls for an embarrassingly parallel computation. I did
 a quick parallelization with OpenMP, without optimizing any of the functions, and only doing the digit sum of `P` inline:
 
 ```c
@@ -304,3 +305,4 @@ Saeed
 [3]: https://en.wikipedia.org/wiki/Euler%27s_totient_function
 [4]: https://en.wikipedia.org/wiki/Two%27s_complement
 [5]: https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+[6]: https://en.wikipedia.org/wiki/Carry-save_adder
