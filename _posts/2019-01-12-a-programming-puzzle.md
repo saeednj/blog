@@ -53,10 +53,10 @@ doesn't make sense. For example `5 % 2.5` doesn't have a meaning.
 Or you can see that `s`, `a`, `e` and `d` are defined as arrays, but they are used as indices of another array in `(*s)[a][e][e][d]` without having an index themselves. Or if you look at the output, there are some numbers printed, but there is no `printf` function applied on a number directly in the code!
 
 In the [repository][1], the main challenge code is called `obf.c`, you can compile it
-like: `gcc obf.c`. On my machine with `Intel Core i7-3770 / 16GB RAM / 8MB cache / gcc 4.9.2`, it takes _5 minutes and 2.313 seconds_ to generate the output. 
+like: `gcc obf.c`. Running it on my machine with `Intel Core i7-3770 / 16GB RAM / 8MB cache / gcc 4.9.2`, it takes _5 minutes and 2.313 seconds_ to generate the output. 
 
 I did not limit the choice of programming language and even running platform. I doubted that they could have a winning impact, but I was curious to see solutions on different platforms/languages.
-I was very excited to see how people approached the problem and what are the solutions that I might not have thought about. Well, the number of submitted solutions was, ..., **0**. Not sure if no one looked at it, no one was interested, or it was too hard. Maybe it doesn't matter, because I enjoyed writing it.
+I was very excited to see how people approached the problem and what are the solutions that I might not have thought about. Well, the number of submitted solutions was, umm, **zero**. Not sure if no one looked at it, no one was interested, or it was too hard. Maybe it doesn't matter, because I enjoyed writing it.
 
 
 *At this point if you want to give this challenge a try, please stop reading, as in the following section I talk about my initial solution and later solutions that I thought about.*
@@ -65,14 +65,13 @@ I was very excited to see how people approached the problem and what are the sol
 
 ## My solution
 
-I will try to explain how each function works but I might not go into details. Contact me and let me know if you want to discuss about any of the
-descriptions.
+I will try to explain how each function works but I might not go into details. Let me know if you have any questions or comments on any part.
 
-Before trying to understand the code, one easy thing to do is compiling the code with a compiler optimizer to see how much of the jargon will be pruned away. On my machine `gcc -O3 obf.c` will generate the output in _2 minutes 23.497 seconds_, which is nearly a 2X speed-up already.
+Before trying to understand the code, one easy thing to do is compiling the code with a compiler optimizer to see how much of the jargon will be pruned away. Compiling like `gcc -O3 obf.c` on my machine, gives an executable that generates the desired output in _2 minutes 23.497 seconds_, which is nearly a 2X speed-up already.
 
 Let's de-obfuscate the code a bit.
 
-In C preprocessor directives, `x##y` means concatenation of `x` and `y`. So `#define Const(x,y,z)` just concats its inputs. Now it is easy to see that `Const(un,sign,ed)` is just the word `unsigned`. The next line just defines `float` as `unsigned`, so you can replace all `float`s in the code with `unsigned`. Now, taking remainder over `y` in `x % y` makes sense!
+In C preprocessor directives, `x##y` means concatenation of `x` and `y`. So `#define Const(x,y,z)` just concats its inputs. Therefore `Const(un,sign,ed)` is the word `unsigned`. The next line just defines `float` as `unsigned`, so you can replace all `float`s in the code with `unsigned`. Now, taking remainder over `y` in `x % y` makes sense!
 
 ### Function `A`(dd)
 
@@ -135,7 +134,7 @@ and knowing that `G` is calculating if `a` and `b` are relatively prime, `F` is 
 
 ### Function `S`(quare)
 
-Let's look at the `A(a,1+~b)` first. `~b` inverts all of the bits in `b`, also known as 1's complement of a number. Adding one to 1's complement of a number gives us the [2's complement][4] of it. Negative numbers are represented using 2's complement notation. So `1+~b` is equivalent to `-b`, and we knew that `A(x,y)=x+y`, therefore `A(a,1+~b) = a+(-b) = a-b`.
+Let's look at the `A(a,1+~b)` first. `~b` inverts all of the bits in `b` (in other terms 1's complement of `b`). Adding one to 1's complement of a number gives us its [2's complement][4]. Negative numbers are represented using 2's complement notation. So `1+~b` is equivalent to `-b`, and we knew that `A(x,y)=x+y`, therefore `A(a,1+~b) = a+(-b) = a-b`.
 
 Again we can rewrite the tail recursion as a loop. Note that function `S` is only invoked with `b` set to 1, so we can fix the starting value of `b`.
 ```c
@@ -170,9 +169,9 @@ So, after all, `S` checks if `a` is a perfect square or not.
 
 ### `main` function
 
-Now that we understand each function, we can look at what the main program does. There is a loop over the interval [1, 200000], and for each number first the number is printed using `P` and the sum of digits is recorded (`y = P(x,*d);`, recall that second argument is not used). Each number can be either _Good_, _Bad_ or _Ugly_. If the number is not divisible by its sum of digits, it is _Ugly_ (e.g. 11 is Ugly, because it is not divisible by 1+1=2). If the number is beautiful (not Ugly :P), we check whether phi(x) is a perfect square or not, if it is a perfect square, it is Good, otherwise Bad. For example 12 is a Good number: divisible by 1+2, phi(12)=4=2^2.
+Now that we understand each function, we can look at what the main program does. There is a loop over the interval [1, 200000], and for each number first the number is printed using `P` and the sum of digits is recorded (`y = P(x,*d);`, recall that second argument is not used). Each number can be either _Good_, _Bad_ or _Ugly_. If the number is not divisible by its sum of digits, it is _Ugly_ (e.g. 11 is Ugly, because it is not divisible by 1+1=2). If the number is beautiful (not Ugly :P), we compute the phi(x). If it is a perfect square, the number is Good, otherwise it is Bad. For example 12 is a Good number: divisible by 1+2, phi(12) = 4 = 2^2.
 
-Finally there is a line that was intended to serve as an "easter egg" if you will. If you see the output generated by this line, it says: "Who's 25?" and the answer is in the code itself that says: `(*s)[a][e][e][d]`. This part was only written as a signature thing, otherwise in a solution one might simply write: `printf("Who's 25?\n")`. It showcases one of the weird things that is valid to a C compiler. When a C compiler wants to generate an address to an element of an array, it take the pointer to the head and adds the index to it. So `x[3]` is replaced with `*(x+3)`, and you know that addition is commutative, so it is equal to `*(3+x)` which in array notation is the same as `3[x]` (`x[3]` === `3[x]`). Using this idea, we can swap the index and array name in `(*s)[a][e][e][d]` and get: `d[(*s)[a][e][e]]`, and repeating this, we get: `d[e[e[a[*s]]]]`. `*s` points to the first element in `s`, and it is declared in global scope, so by default it is initialized with zero. `d[e[e[a[*s]]]] = d[e[e[a[0]]]] = d[e[e[0]]] = d[e[0]] = d[0]`, and we know the value of that, because of the line `*d = 25;`
+Finally there is a line that was intended to serve as an "easter egg" if you will. If you see the output generated by this line, it says: "Who's 25?" and the answer is in the code itself that says: `(*s)[a][e][e][d]`. This part was only written as a signature thing, otherwise in a solution one might simply write: `printf("Who's 25?\n")`. It showcases one of the weird things that is valid to a C compiler. When a C compiler wants to generate address to an array element, it adds the index to the base pointer. So `x[3]` is replaced with `*(x+3)`, and you know that addition is commutative, so it is equal to `*(3+x)` which in array notation is the same as `3[x]` (`x[3]` === `3[x]`). Using this idea, we can swap the index and array name in `(*s)[a][e][e][d]` and get: `d[(*s)[a][e][e]]`, and repeating this, we get: `d[e[e[a[*s]]]]`. `*s` points to the first element in `s`. The arrays `a`, `e`, `d` and `s` are declared in the global scope, so by default they are initialized with zero. Therefore `d[e[e[a[*s]]]] = d[e[e[a[0]]]] = d[e[e[0]]] = d[e[0]] = d[0]`, and we know the value of that, because of the line `*d = 25;`
 
 ### Optimized version
 
@@ -198,7 +197,7 @@ int isSquare(int n)
 
 #### Phi function
 
-The main improvement we can make is the computation of phi of each number. The trivial implementation given in the code, performs `O(n)` calls to GCD for each number, therefore, we have `O(n^2)` calls in total, which is the most expensive part of the code. We can compute the phi of a number `n` based on the phi of smaller numbers, and because we are computing the phi for those numbers in the loop, we can use memoization to dramatically improve the computation of later phi values. Writing math equation is not very easy in Markdown, so I refer you to the Wikipedia page for the [Euler's phi function][3]. The relation I mainly used is `Phi(p^k) = p^k * (p-1)` where `p` is a prime number. So scanning prime factors of the input number `n`, if (`p` divides `n / p`) (`n` has prime factor `p` of power more than one),
+The main improvement we can make is the computation of phi of each number. The trivial implementation given in the code, performs `O(n)` calls to GCD for each number, therefore, we have `O(n^2)` calls in total, which is the most expensive part of the code. We can compute the phi of a number `n` based on the phi of smaller numbers, and because we are computing the phi of all the numbers in the interval anyway, we can use memoization to dramatically improve the computation of later phi values. Writing math equation is not very easy in Markdown, so I refer you to the Wikipedia page for the [Euler's phi function][3]. The relation I mainly used is `Phi(p^k) = p^k * (p-1)` where `p` is a prime number. So scanning prime factors of the input number `n`, if (`p` divides `n / p`) (`n` has prime factor `p` of power more than one),
 `Phi(n) = Phi(n / p) *  p` and `Phi(n) = Phi(n / p) * (p-1)` otherwise.
 
 Now we can store all the computed values of Phi (memoization) to avoid computing them multiple times. This way, computing some of the Phi values takes only one division and one multiplication. Considering that I have computed the prime numbers in the array `p`, and the array `PHI` is used for recording previously computed values, the code for computing Phi is:
@@ -255,7 +254,7 @@ int main() {
 
 ```
 
-The full version can be found in the [repo][1] in the file `ans.c`, and on the machine I mentioned above, it generates the same output in _0.05 seconds_.
+The full version can be found in the [repo][1] in the file `ans.c`, and on the machine specification I mentioned above, it generates the same output in _0.05 seconds_.
 
 ## Other solutions
 
@@ -295,7 +294,17 @@ On the same machine, using 8 cores, and with compiler optimization (`gcc -fopenm
 
 Finally I tried parallelizing the code with a GPU. You can find the code in `gpu.cu`. I tried to keep the code as close to what it is and not optimizing it, but I had to unroll the recursive calls to loops. Using CUDA and a very cheap laptop GPU, the results were ready in _1.3 seconds_, which reaches the goal of the challenge. Although not beating my initial solution :P
 
-Please feel free to reach out if you have any comments on any part.
+The table below summarizes the runtime of my solutions. The time limit to match was 10 seconds.
+
+| Version | Runtime (s) |
+| ------- | ----------- |
+| Original code | 302.313 |
+| gcc optimization only | 143.97 |
+| OpenMP 8-core parallelization + gcc optimization | 37.826 |
+| Nvidia G105M parallelization | 1.3 |
+| Algorithmically optimized | 0.05 |
+
+I'd be happy to hear your comments on this editorial.
 
 Saeed
 
