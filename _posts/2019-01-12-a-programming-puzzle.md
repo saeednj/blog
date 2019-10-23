@@ -1,6 +1,6 @@
 ---
 layout: post
-title: A Programming Puzzle
+title: The Good, the Bad and the Ugly: A Programming Puzzle
 author: Saeed
 tags: Technical Programming Puzzle Obfuscation
 excerpt: 
